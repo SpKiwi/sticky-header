@@ -1,4 +1,4 @@
-package com.example.stickyheader.adapter
+package com.example.stickyheader.adapter.model
 
 data class TestItem(
     val id: Long,

@@ -2,7 +2,6 @@ package com.example.stickyheader.adapter;
 
 import android.graphics.Canvas;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +9,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.stickyheader.adapter.sticky.StickyItemOwner;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -55,7 +56,7 @@ public class StickyItemDecoration extends RecyclerView.ItemDecoration {
         }
         Log.d("myLog", "positionInfo: " + positionInfo.toString());
 
-        View currentHeader = stickyItemOwner.getStickyItemView();
+        View currentHeader = stickyItemOwner.getStickyItemViewHolder().itemView;
         if (currentHeader == null) {
             return;
         }
@@ -228,21 +229,4 @@ public class StickyItemDecoration extends RecyclerView.ItemDecoration {
         }
     }
 
-    public interface StickyItemOwner {
-
-        @Nullable View getStickyItemView();
-
-        /**
-         * This method gets called by {@link StickyItemDecoration} to verify whether the item represents a header.
-         *
-         * @param itemPosition int.
-         * @return true, if item at the specified adapter's position represents a header.
-         */
-        boolean isStickyItem(int itemPosition);
-
-        /**
-         *
-         **/
-        int getStickyItemPosition();
-    }
 }

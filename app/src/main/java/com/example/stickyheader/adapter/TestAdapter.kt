@@ -9,10 +9,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.stickyheader.R
+import com.example.stickyheader.adapter.model.TestItem
+import com.example.stickyheader.adapter.sticky.StickyItemOwner
 
 class TestAdapter(
     private val upClickCallback: (Int) -> Unit
-) : RecyclerView.Adapter<TestAdapter.TestViewHolder>(), StickyItemDecoration.StickyItemOwner {
+) : RecyclerView.Adapter<TestAdapter.TestViewHolder>(), StickyItemOwner {
 
     var items: List<TestItem> = emptyList()
         set(value) {
@@ -63,32 +65,39 @@ class TestAdapter(
         holder.itemUpButton.setOnClickListener(null)
     }
 
-    private var stickyItemViewHolder: TestViewHolder? = null
+    /* Sticky item decoration */
+
+    private var recyclerView: RecyclerView? = null
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        val stickyItemView = LayoutInflater
-            .from(recyclerView.context)
-            .inflate(R.layout.recycler_item, recyclerView, false)
-
-//        stickyItemViewHolder = TestViewHolder(stickyItemView).apply { // todo handle it when rebinding data
-//            bind(items[stickyItemPosition])
-//        }
+        this.recyclerView = recyclerView
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        stickyItemViewHolder = null
+        this.recyclerView = null
     }
 
-    override fun getStickyItemView(): View? =
-        stickyItemViewHolder?.itemView
+    override val stickyItemViewHolder: TestViewHolder by lazy {
+        TestViewHolder(
+            recyclerView?.let {
+                LayoutInflater.from(it.context).inflate(R.layout.recycler_item, it, false)
+            } ?: throw RuntimeException("RecyclerView of the stickyItemView can't be null")
+        )
+    }
 
-    override fun isStickyItem(itemPosition: Int): Boolean =
-        items[itemPosition].isCurrentUser
+    override fun isStickyItem(position: Int): Boolean =
+        items[position].isCurrentUser
 
-    override fun getStickyItemPosition(): Int =
+    override val stickyItemPosition: Int get() =
         items.indexOfFirst { it.isCurrentUser }
+
+    override fun bindStickyItem() {
+        stickyItemViewHolder.bind(items[stickyItemPosition])
+    }
+
+    /*  */
 
     /* ViewHolders, callbacks, etc. */
 
