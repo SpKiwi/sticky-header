@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_drawable"
-    android:layout_marginTop="2dp"
-    android:padding="4dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/itemNumber"
