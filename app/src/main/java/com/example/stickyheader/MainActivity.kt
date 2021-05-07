@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         itemRecycler.scrollToPosition(scrollTo)
     }
 
-    private var initialTestData: List<TestItem> = generateInitialTestData(30, 50)
+    private var initialTestData: List<TestItem> = generateInitialTestData(30, 150)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,10 +44,9 @@ class MainActivity : AppCompatActivity() {
         itemRecycler.apply {
             adapter = itemAdapter
             layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
-            addItemDecoration(StickyItemDecoration(this, itemAdapter))
+//            addItemDecoration(StickyItemDecoration(this, itemAdapter))
         }
         itemAdapter.items = initialTestData
     }
-
 
 }

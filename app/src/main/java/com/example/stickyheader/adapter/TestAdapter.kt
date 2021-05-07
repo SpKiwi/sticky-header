@@ -14,7 +14,7 @@ import com.example.stickyheader.adapter.sticky.StickyItemOwner
 
 class TestAdapter(
     private val upClickCallback: (Int) -> Unit
-) : RecyclerView.Adapter<TestAdapter.TestViewHolder>(), StickyItemOwner {
+) : RecyclerView.Adapter<TestAdapter.TestViewHolder>()/*, StickyItemOwner*/ {
 
     var items: List<TestItem> = emptyList()
         set(value) {
@@ -67,35 +67,35 @@ class TestAdapter(
 
     /* Sticky item decoration */
 
-    private var recyclerView: RecyclerView? = null
-
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        this.recyclerView = recyclerView
-    }
-
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView)
-        this.recyclerView = null
-    }
-
-    override val stickyItemViewHolder: TestViewHolder by lazy {
-        TestViewHolder(
-            recyclerView?.let {
-                LayoutInflater.from(it.context).inflate(R.layout.recycler_item, it, false)
-            } ?: throw RuntimeException("RecyclerView of the stickyItemView can't be null")
-        )
-    }
-
-    override fun isStickyItem(position: Int): Boolean =
-        items[position].isCurrentUser
-
-    override val stickyItemPosition: Int get() =
-        items.indexOfFirst { it.isCurrentUser }
-
-    override fun bindStickyItem() {
-        stickyItemViewHolder.bind(items[stickyItemPosition])
-    }
+//    private var recyclerView: RecyclerView? = null
+//
+//    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+//        super.onAttachedToRecyclerView(recyclerView)
+//        this.recyclerView = recyclerView
+//    }
+//
+//    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+//        super.onDetachedFromRecyclerView(recyclerView)
+//        this.recyclerView = null
+//    }
+//
+//    override val stickyItemViewHolder: TestViewHolder by lazy {
+//        TestViewHolder(
+//            recyclerView?.let {
+//                LayoutInflater.from(it.context).inflate(R.layout.recycler_item, it, false)
+//            } ?: throw RuntimeException("RecyclerView of the stickyItemView can't be null")
+//        )
+//    }
+//
+//    override fun isStickyItem(position: Int): Boolean =
+//        items[position].isCurrentUser
+//
+//    override val stickyItemPosition: Int get() =
+//        items.indexOfFirst { it.isCurrentUser }
+//
+//    override fun bindStickyItem() {
+//        stickyItemViewHolder.bind(items[stickyItemPosition])
+//    }
 
     /*  */
 
