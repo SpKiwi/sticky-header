@@ -1,6 +1,5 @@
 package com.example.stickyheader.adapter
 
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
@@ -20,7 +19,7 @@ class StickyItemScrollListener(
         }
     }
 
-    private val previousStickyItemAnchor: StickyItemAnchor? = null // todo add previous state to prevent calculations
+    private var previousStickyItemAnchor: StickyItemAnchor? = null
     private val stickyHeaderView: View get() = stickyViewHolder.itemView
 
     override fun onScrollChange(view: View, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
@@ -28,32 +27,19 @@ class StickyItemScrollListener(
         val stickyItemPosition = stickyItemPosition()
 
         val stickyItemAnchor = getPositionInfo(recyclerView, stickyItemPosition)
+
+        if (stickyHeaderView.height == 0 || previousStickyItemAnchor == stickyItemAnchor) {
+            return
+        }
+        previousStickyItemAnchor = stickyItemAnchor
+
         if (stickyItemAnchor == null) {
-            stickyHeaderView.visibility = View.GONE
+            stickyHeaderView.visibility = View.INVISIBLE
             return
         }
 
         fixStickyItemPositioning(stickyItemAnchor, recyclerView, stickyHeaderView)
-        /* TODO check if the following is needed */
-        val childInContact = getClosestChildInContact(recyclerView, stickyHeaderView, stickyItemAnchor) ?: return
-//
-//        if (recyclerView.getChildAdapterPosition(childInContact) == stickyItemPosition) {
-//            stickyHeaderView.visibility = View.GONE
-//            return
-//        }
-//        /* TODO until here */
-//
-//        stickyHeaderView.visibility = View.VISIBLE
-
-//        when (stickyItemAnchor) {
-//            StickyItemAnchor.BOTTOM,
-//            StickyItemAnchor.TOP -> {
-//                stickyHeaderView.visibility = View.VISIBLE
-//            }
-//            StickyItemAnchor.UNKNOWN -> {
-//                TODO()
-//            }
-//        }.exhaustive
+        fixStickyHeaderVisibility(recyclerView, stickyHeaderView, stickyItemAnchor, stickyItemPosition)
     }
 
     private fun getPositionInfo(parent: RecyclerView, stickyItemPosition: Int): StickyItemAnchor? {
@@ -75,84 +61,54 @@ class StickyItemScrollListener(
             return StickyItemAnchor.BOTTOM
         }
         return null
-//        return StickyItemAnchor.UNKNOWN
     }
 
     private fun fixStickyItemPositioning(itemAnchor: StickyItemAnchor, parent: ViewGroup, view: View) {
-        // Specs for parent (RecyclerView)
-        val widthSpec = View.MeasureSpec.makeMeasureSpec(parent.width, View.MeasureSpec.EXACTLY)
-        val heightSpec = View.MeasureSpec.makeMeasureSpec(parent.height, View.MeasureSpec.UNSPECIFIED)
-
-        // Specs for children (headers)
-        val childWidthSpec = ViewGroup.getChildMeasureSpec(widthSpec, parent.paddingLeft + parent.paddingRight, view.layoutParams.width)
-        val childHeightSpec = ViewGroup.getChildMeasureSpec(heightSpec, parent.paddingTop + parent.paddingBottom, view.layoutParams.height)
-        view.measure(childWidthSpec, childHeightSpec)
-
         when (itemAnchor) {
             StickyItemAnchor.TOP -> {
-                view.layout(
-                    0,
-                    0,
-                    view.measuredWidth,
-                    view.measuredHeight
-                )
+                view.translationY = 0f
             }
             StickyItemAnchor.BOTTOM -> {
-                view.layout(
-                    0,
-                    parent.measuredHeight - view.measuredHeight,
-                    view.measuredWidth,
-                    parent.measuredHeight
-                )
+                view.translationY = (parent.height - view.height).toFloat()
             }
-            StickyItemAnchor.UNKNOWN -> Unit
         }.exhaustive
     }
 
-    private fun getClosestChildInContact(parent: RecyclerView, currentHeader: View, itemAnchor: StickyItemAnchor)/*: View?*/ {
-        var childInContact: View? = null
+    private fun fixStickyHeaderVisibility(parent: RecyclerView, stickyHeader: View, itemAnchor: StickyItemAnchor, stickyItemPosition: Int) {
+        val child = parent.children
+            .find { child ->
+                parent.getChildAdapterPosition(child) == stickyItemPosition
+            }
+
+        if (child == null) {
+            stickyHeaderView.visibility = View.VISIBLE
+            return
+        }
+
         when (itemAnchor) {
             StickyItemAnchor.BOTTOM -> {
-                val contactPoint = currentHeader.top
-                parent.children
-                    .asIterable()
-                    .reversed()
-                    .forEach { child ->
-                        if (child.top > contactPoint) {
-                            childInContact = child
-                            if (parent.getChildAdapterPosition(childInContact!!) == (stickyItemPosition())) {
-                                Log.d("myLog", "GONE parent.getChildAdapterPosition(childInContact!!) = ${parent.getChildAdapterPosition(childInContact!!)}, stickyItemPosition()=${stickyItemPosition()}")
-                                stickyHeaderView.visibility = View.GONE
-                            } else {
-                                Log.d("myLog", "VISIBLE parent.getChildAdapterPosition(childInContact!!) = ${parent.getChildAdapterPosition(childInContact!!)}, stickyItemPosition()=${stickyItemPosition()}")
-                                stickyHeaderView.visibility = View.VISIBLE
-                            }
-                            return@forEach
-                        }
-                    }
-            }
-            StickyItemAnchor.TOP -> {
-                val contactPoint = currentHeader.bottom
-                parent.children.forEach { child ->
-                    if (child.bottom < contactPoint) {
-                        childInContact = child
-                        if (parent.getChildAdapterPosition(childInContact!!) == (stickyItemPosition())) {
-                            stickyHeaderView.visibility = View.GONE
-                        } else {
-                            stickyHeaderView.visibility = View.VISIBLE
-                        }
-                        return@forEach
-                    }
+                val contactPoint = stickyHeader.top
+
+                if (child.bottom < contactPoint) {
+                    stickyHeaderView.visibility = View.INVISIBLE
+                } else {
+                    stickyHeaderView.visibility = View.VISIBLE
                 }
             }
-            StickyItemAnchor.UNKNOWN -> throw RuntimeException()
-        }.exhaustive
+            StickyItemAnchor.TOP -> {
+                val contactPoint = stickyHeader.bottom
 
-//        return childInContact
+                if (child.top > contactPoint) {
+                    stickyHeaderView.visibility = View.INVISIBLE
+                } else {
+                    stickyHeaderView.visibility = View.VISIBLE
+                }
+            }
+        }.exhaustive
     }
 
     private enum class StickyItemAnchor {
-        BOTTOM, TOP, UNKNOWN // todo check if unknown is needed
+        BOTTOM, TOP
     }
 
 }
