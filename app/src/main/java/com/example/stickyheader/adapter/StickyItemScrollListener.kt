@@ -23,8 +23,12 @@ class StickyItemScrollListener(
     private val stickyHeaderView: View get() = stickyViewHolder.itemView
 
     override fun onScrollChange(view: View, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
-        val recyclerView = view as RecyclerView
         val stickyItemPosition = stickyItemPosition()
+        if (stickyItemPosition == -1) {
+            stickyHeaderView.visibility = View.INVISIBLE
+            return
+        }
+        val recyclerView = view as RecyclerView
 
         val stickyItemAnchor = getPositionInfo(recyclerView, stickyItemPosition)
 

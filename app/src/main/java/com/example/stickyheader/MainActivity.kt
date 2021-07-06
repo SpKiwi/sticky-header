@@ -2,7 +2,10 @@ package com.example.stickyheader
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.TextView
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.stickyheader.adapter.*
@@ -10,6 +13,7 @@ import com.example.stickyheader.adapter.adapter.TestAdapter
 import com.example.stickyheader.adapter.adapter.TestViewHolder
 import com.example.stickyheader.adapter.model.TestItem
 import com.example.stickyheader.adapter.model.generateInitialTestData
+import kotlinx.coroutines.flow.flow
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,20 +47,34 @@ class MainActivity : AppCompatActivity() {
         itemRecycler.scrollToPosition(scrollTo)
     }
 
-    private var initialTestData: List<TestItem> = generateInitialTestData(30, 150)
+    private var initialTestData: List<TestItem> = generateInitialTestData(0, 20)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+//        findViewById<View>(R.id.textButton).setOnClickListener {
+//            findViewById<TextView>(R.id.textView).text = (++texto).toString()
+//        }
+
         itemAdapter.items = initialTestData
         itemRecycler.apply {
             adapter = itemAdapter
+            setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
             setOnScrollChangeListener(StickyItemScrollListener(itemRecycler, stickyItemHeader) {
                 itemAdapter.stickyItemPosition
             })
+            stickyItemHeader.itemView.setOnClickListener {
+                Log.d("myLog", "Click sticky item")
+            }
         }
+    }
+
+    fun some() {
+        flow<Int> {
+            emit(1)
+        }.asLiveData()
     }
 
 }

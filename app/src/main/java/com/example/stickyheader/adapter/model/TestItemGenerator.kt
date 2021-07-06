@@ -22,7 +22,7 @@ private fun generateSelf(position: Int) =
     TestItem(
         id = generateNextId(),
         position = position + 1,
-        coins = 1000L - position,
+        coins = 1000L - position * 3,
         name = "Andrei Malaev",
         isCurrentUser = true
     )
@@ -31,7 +31,7 @@ private fun generateStranger(position: Int): TestItem =
     TestItem(
         id = generateNextId(),
         position = position + 1,
-        coins = 1000L - position,
+        coins = 1000L - position * 3,
         name = "${names.random()} ${lastNames.random()}",
         isCurrentUser = false
     )

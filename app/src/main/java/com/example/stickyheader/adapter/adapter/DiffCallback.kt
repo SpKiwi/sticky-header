@@ -17,13 +17,15 @@ open class DiffCallback(
     override fun getNewListSize(): Int = newList.size
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-        oldList[oldItemPosition] == newList[newItemPosition]
+        false
 
     override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
         val oldElement = oldList[oldItemPosition]
         val newElement = newList[newItemPosition]
 
-        val diff = Bundle()
+        val diff = Bundle().apply {
+            putByte(PAYLOAD_REBIND, -1)
+        }
 
         if (oldElement.position != newElement.position) {
             diff.putByte(PAYLOAD_POSITION, -1)
@@ -33,11 +35,12 @@ open class DiffCallback(
             diff.putByte(PAYLOAD_COINS, -1)
         }
 
-        return if (diff.size() == 0) null else diff
+        return diff
     }
 
     companion object {
         const val PAYLOAD_POSITION = "PAYLOAD_POSITION"
         const val PAYLOAD_COINS = "PAYLOAD_COINS"
+        const val PAYLOAD_REBIND = "PAYLOAD_REBIND"
     }
 }
